@@ -1,4 +1,4 @@
-# Medical Web Crawler Project
+# Medical Web Crawler Web Application
 
 This project is a web application designed to generate therapeutic hypotheses given links to research. It utilizes FastAPI for the backend API, Next.js for the frontend, and OpenAI's large language model for hypothesis generation.
 
