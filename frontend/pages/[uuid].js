@@ -72,37 +72,38 @@ export default function Home() {
     // if UUID is of valid format but no corresponding data is found, return 404 error
     // if UUID is invalidly formatted, return to homepage
     return (
-        <div>
-            <h2>Enter Research Link:</h2>
-            <form onSubmit={submit}>
-            <label>
-            <input
-                type="text"
-                value={url}
-                onChange={(event) => setUrl(event.target.value)}
-            />
-            </label>
-            <button type="submit">Submit</button>
-        </form>
+        <div className="container">
+            <h2>Input Research Link</h2>
+            <form className="form-container" onSubmit={submit}>
+                <label>
+                    <input
+                        type="text"
+                        value={url}
+                        onChange={(event) => setUrl(event.target.value)}
+                        placeholder="Enter URL"
+                    />
+                </label>
+                <button type="submit" className="submit-btn">Submit</button>
+            </form>
 
-        {response && !response.detail ? (
-            <div>
-            <h2>Response:</h2>
-            <ul>
-                {Object.entries(response).map(([key, value]) => (
-                <li key={key}>
-                    <strong>{key}:</strong> {JSON.stringify(value)}
-                </li>
-                ))}
-            </ul>
-            </div>
-        ) : response && response.detail ? (
-            <div>
-            <h2>404 Not Found</h2>
-            </div>
-        ) : (
-            <Index />
-        )}
+            {response && !response.detail ? (
+                <div className="response-container">
+                    <h2>Response</h2>
+                    <ul className="response-list">
+                        {Object.entries(response).map(([key, value]) => (
+                            <li key={key} className="response-item">
+                                <strong>{key}:</strong> {JSON.stringify(value)}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ) : response && response.detail ? (
+                <div>
+                    <h2>404 Not Found</h2>
+                </div>
+            ) : (
+                <Index />
+            )}
         </div>
     );
     }

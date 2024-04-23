@@ -35,24 +35,25 @@ export default function Home() {
 
   // render components for webpage
   return (
-    <div>
-      <h2>Enter Research Link:</h2>
-      <form onSubmit={submit}>
+    <div className="container">
+      <h2>Input Research Link</h2>
+      <form className="form-container" onSubmit={submit}>
         <label>
           <input
             type="text"
             value={url}
             onChange={(event) => setUrl(event.target.value)}
+            placeholder="Enter URL"
           />
         </label>
-        <button type="submit">Submit</button>
+        <button className="submit-btn" type="submit">Submit</button>
       </form>
       {response && (
-        <div>
-          <h2>Response:</h2>
-          <ul>
+        <div className="response-container">
+          <h2>Response</h2>
+          <ul className="response-list">
             {Object.entries(response).map(([key, value]) => (
-              <li key={key}>
+              <li className="response-item" key={key}>
                 <strong>{key}:</strong> {JSON.stringify(value)}
               </li>
             ))}

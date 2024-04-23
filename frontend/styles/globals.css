@@ -1,40 +1,65 @@
 body {
-    background-color: #121212;
-    color: #ffffff;
-    margin: 20px;
-  }
-  
-  input[type="text"] {
-    background-color: #333;
-    color: #ffffff;
-    border: 1px solid #666;
-    margin-bottom: 10px;
-  }
-  
-  button {
-    background-color: #444;
-    color: #ffffff;
-    border: none;
-    padding: 8px 16px;
-    cursor: pointer;
-    margin-bottom: 10px;
-  }
-  
-  button:hover {
-    background-color: #555;
-  }
-  
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  li {
-    margin-bottom: 10px;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 10px;
-  }
-  
+  font-family: Arial, sans-serif;
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.form-container {
+  margin-bottom: 20px;
+  width: 500px;
+}
+
+input[type="text"] {
+  width: 360px;
+  padding: 10px;
+  border: none;
+  border-radius: 25px;
+  outline: none;
+  background-color: #333;
+  color: #fff;
+  margin-right: 10px;
+}
+
+.submit-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  background-color: #008cba;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #0073aa;
+}
+
+.response-container {
+  margin-top: 20px;
+  width: 500px;
+}
+
+.response-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.response-item {
+  margin-bottom: 10px;
+}
+
+.response-container h2 {
+  text-align: center;
+}
+
+.response-list {
+  text-align: left;
+}
