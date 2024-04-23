@@ -1,0 +1,8 @@
+bs4==0.0.2
+fastapi==0.110.2
+instructor==1.2.2
+openai==1.23.2
+pydantic==2.7.0
+selenium==4.19.0
+supabase==2.4.3
+uvicorn==0.29.0

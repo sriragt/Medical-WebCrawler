@@ -25,7 +25,7 @@ async def generate_hypothesis(front_data: dict):
     url = front_data.get("url")
 
     # check if data for the URL already exists in results.json
-    json_file_path = os.path.join(os.getcwd(), "results.json")
+    json_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../results.json")
     with open(json_file_path, 'r') as results_file:
         json_data = json.load(results_file)
 
