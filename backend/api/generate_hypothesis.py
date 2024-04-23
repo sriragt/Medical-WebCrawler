@@ -23,10 +23,12 @@ async def generate_hypothesis(front_data: dict):
 
     # extract URL from request data
     url = front_data.get("url")
-    with open('results.json', 'r') as results_file:
-        json_data = json.load(results_file)
-    
+
     # check if data for the URL already exists in results.json
+    json_file_path = os.path.join(os.getcwd(), "results.json")
+    with open(json_file_path, 'r') as results_file:
+        json_data = json.load(results_file)
+
     for item in json_data:
         if item["url"] == url:
             unstructured_text = item["text"]
