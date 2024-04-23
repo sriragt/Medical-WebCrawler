@@ -2,6 +2,7 @@ import asyncio
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
+# use Selenium to scrape webpages with dynamically rendered content
 async def scrape_url_with_selenium(url):
 
     # initialize Chrome WebDriver
@@ -13,7 +14,9 @@ async def scrape_url_with_selenium(url):
     html_content =  browser.page_source
     return html_content
 
+# find titles, authors, and texts from content
 async def scrape_url(url):
+
     # implemented scraper using Zyte API (could not scrape dynamically rendered webpages)
     # client = AsyncZyteAPI(api_key=api_key)
     # response = await client.get({"url": url, "httpResponseBody": True})

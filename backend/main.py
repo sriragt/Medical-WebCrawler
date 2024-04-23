@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 import uvicorn
 
 # import API routers
@@ -16,7 +15,7 @@ origins = [
     "http://localhost:3000"
 ]
 
-# add CORS middleware
+# add CORS middleware for access control
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
