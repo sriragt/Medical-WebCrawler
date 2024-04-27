@@ -10,7 +10,7 @@ async def scrape_url_with_selenium(url):
     browser.get(url)
 
     # allow time dynamic content to load
-    await asyncio.sleep(15)
+    await asyncio.sleep(25)
     html_content =  browser.page_source
     return html_content
 
