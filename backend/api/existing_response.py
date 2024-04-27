@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Path
 from supabase import create_client
-import os
-import json
+import os, json
 
 # initialize API router
 router = APIRouter()

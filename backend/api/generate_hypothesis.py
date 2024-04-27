@@ -1,13 +1,10 @@
-from fastapi import APIRouter, HTTPException, Path
-from typing import List
+from fastapi import APIRouter, HTTPException
 from models.therapeutic_hypothesis import TherapeuticHypothesis
+from models.drug_list import DrugList
 from scraper.url_scraper import scrape_url
 from supabase import create_client
-import openai
-import os
-import uuid
-import instructor
-import json
+from openai import AsyncOpenAI, OpenAI
+import os, uuid, instructor, json, asyncio
 
 # initialize API router
 router = APIRouter()
@@ -43,24 +40,55 @@ async def generate_hypothesis(front_data: dict):
         unstructured_text = new_data["text"]
     
     # define messages for OpenAI LLM chat completion
-    llm_messages = [
-        {"role": "system", "content": "The following is a research paper on a novel. Do not use any outside information other than this excerpt, and if a specific field is not mentioned say \"not mentioned\". Find the name of the drug given in this excerpt and the protein target and disease addressed by the drug if mentioned in the excerpt. Add the verbatim text that supports these claims into the citation, the speakers who are making the extracted claims, and the name of any past or upcoming clinical trials that will feature this drug. Finally, include the the results (e.g., overall survival, progression-free survival) of the drug and be concise."},
+    drug_messages = [
+        {"role": "system", "content": "The following is a research paper on a novel. Do not use any outside information other than this excerpt. Find every drug described in this excerpt. If there is no information about the drug other than the name, do not include it."},
         {"role": "user", "content": unstructured_text}
     ]
 
     # initialize OpenAI client
-    client = openai.OpenAI(
+    client = OpenAI(
         base_url="https://api.together.xyz/v1",
         api_key=os.environ["TOGETHER_API_KEY"],
     )
     client = instructor.from_openai(client, mode=instructor.Mode.TOOLS)
+    # client = instructor.apatch(AsyncOpenAI())
 
     # create chat completion using OpenAI client using Pydantic model for validation
-    llm_response: TherapeuticHypothesis = client.chat.completions.create(
+    drug_response: DrugList = client.chat.completions.create(
         model="mistralai/Mixtral-8x7B-Instruct-v0.1",
-        response_model=TherapeuticHypothesis,
-        messages=llm_messages,
+        response_model=DrugList,
+        messages=drug_messages,
     )
+
+    # tasks = []
+    llm_responses = {}
+
+    # throttle to first 20 drugs seen on page
+    for i in range(min(len(drug_response.drugs), 20)):
+        drug = drug_response.drugs[i]
+
+        llm_messages = [
+            {"role": "system", "content": f'The following is a research paper on a novel. Do not use any outside information other than this excerpt, and if a specific field is not mentioned say "not mentioned". Given the name of the drug, {drug}, find the protein target and disease addressed by {drug} if mentioned in the excerpt. Add the short section of verbatim text that supports these claims into the citation, the speakers who are making the extracted claims, and the name of any past or upcoming clinical trials that will feature {drug}, and say "not mentioned" if these fields are not mentioned. Do not make the citation too long. Finally, include the the results (e.g., overall survival, progression-free survival) of {drug}. Be concise.'},
+            {"role": "user", "content": unstructured_text}
+        ]
+
+        # create chat completion using OpenAI client using Pydantic model for validation
+        # tasks.append(
+        #     client.chat.completions.create(
+        #         model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+        #         response_model=TherapeuticHypothesis,
+        #         messages=llm_messages,
+        #     )
+        # )
+        llm_response: TherapeuticHypothesis = client.chat.completions.create(
+                model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+                response_model=TherapeuticHypothesis,
+                messages=llm_messages,
+            )
+        
+        llm_responses[drug] = llm_response.json()
+
+    # llm_responses = await asyncio.gather(*tasks)
 
     # generate UUID for database and URL sharing
     new_uuid = str(uuid.uuid4())
@@ -69,7 +97,7 @@ async def generate_hypothesis(front_data: dict):
     response_data = {
         "UUID": new_uuid,
         "URL": url,
-        "Content": llm_response.json()
+        "Content": json.dumps(llm_responses)
     }
 
     # insert response data into Supabase table
@@ -79,4 +107,4 @@ async def generate_hypothesis(front_data: dict):
         raise HTTPException(status_code=500, detail="Error storing response in database")
 
     # return the chat completion response and UUID
-    return {"llm_response": llm_response, "new_uuid": new_uuid}
+    return {"llm_response": json.dumps(llm_responses), "new_uuid": new_uuid}

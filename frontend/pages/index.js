@@ -5,12 +5,15 @@ export default function Home() {
   // manage the URL input value and the response from the server
   const [url, setUrl] = useState('');
   const [response, setResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState('Loading');
 
   // handle form submission
   const submit = async (event) => {
 
     // prevent the default form submission behavior that causes webpage to reload
     event.preventDefault();
+    setLoading(true);
 
     // send a POST request to the FastAPI server with the entered URL
     const response = await fetch('http://localhost:8000/api/generate_hypothesis/', {
@@ -23,7 +26,7 @@ export default function Home() {
 
     // parse response from the server as JSON
     const data = await response.json();
-
+    
     // update response variable state with server output
     setResponse(data.llm_response);
 
@@ -31,35 +34,49 @@ export default function Home() {
     if (data && data.new_uuid) {
       window.location.href = `/${data.new_uuid}`;
     }
+
+    // set loading state to false after response is received
+    setLoading(false);
   };
+
+  // create dynamic loading page
+  useEffect(() => {
+      const intervalId = setInterval(() => {
+          setLoadingText(prevText => {
+              switch (prevText) {
+                  case 'Loading':
+                      return 'Loading.';
+                  case 'Loading.':
+                      return 'Loading..';
+                  case 'Loading..':
+                      return 'Loading...';
+                  default:
+                      return 'Loading';
+              }
+          });
+      }, 750);
+
+      return () => clearInterval(intervalId);
+  }, []);
 
   // render components for webpage
   return (
     <div className="container">
       <h2>Input Research Link</h2>
-      <form className="form-container" onSubmit={submit}>
-        <label>
-          <input
-            type="text"
-            value={url}
-            onChange={(event) => setUrl(event.target.value)}
-            placeholder="Enter URL"
-          />
-        </label>
-        <button className="submit-btn" type="submit">Submit</button>
-      </form>
-      {response && (
-        <div className="response-container">
-          <h2>Response</h2>
-          <ul className="response-list">
-            {Object.entries(response).map(([key, value]) => (
-              <li className="response-item" key={key}>
-                <strong>{key}:</strong> {JSON.stringify(value)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <div className='form-continer'>
+          <form className="form" onSubmit={submit}>
+              <label>
+                  <input
+                      type="text"
+                      value={url}
+                      onChange={(event) => setUrl(event.target.value)}
+                      placeholder="Enter URL"
+                  />
+              </label>
+              <button type="submit" className="submit-btn">Submit</button>
+          </form>
+      </div>
+      {loading && <p>{loadingText}</p>}
     </div>
   );
 }

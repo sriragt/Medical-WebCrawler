@@ -7,6 +7,8 @@ export default function Home() {
     // manage the URL input value and the response from the server
     const [url, setUrl] = useState('');
     const [response, setResponse] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [loadingText, setLoadingText] = useState('Loading');
     
     // access Next.js router and extract UUID from router query
     const router = useRouter();
@@ -17,6 +19,7 @@ export default function Home() {
 
         // prevent the default form submission behavior that causes webpage to reload
         event.preventDefault();
+        setLoading(true);
 
         // send a POST request to the FastAPI server with the entered URL
         const response = await fetch('http://localhost:8000/api/generate_hypothesis/', {
@@ -37,6 +40,8 @@ export default function Home() {
         if (data && data.new_uuid) {
             window.location.href = `/${data.new_uuid}`;
         }
+
+        setLoading(false);
     };
 
     // extract UUID from URL pathname
@@ -68,41 +73,80 @@ export default function Home() {
         fetchData();
     }, []);
 
+    // create dynamic loading page
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setLoadingText(prevText => {
+                switch (prevText) {
+                    case 'Loading':
+                        return 'Loading.';
+                    case 'Loading.':
+                        return 'Loading..';
+                    case 'Loading..':
+                        return 'Loading...';
+                    default:
+                        return 'Loading';
+                }
+            });
+        }, 750);
+
+        return () => clearInterval(intervalId);
+    }, []);
+
     // render components for webpage
     // if UUID is of valid format but no corresponding data is found, return 404 error
     // if UUID is invalidly formatted, return to homepage
     return (
         <div className="container">
             <h2>Input Research Link</h2>
-            <form className="form-container" onSubmit={submit}>
-                <label>
-                    <input
-                        type="text"
-                        value={url}
-                        onChange={(event) => setUrl(event.target.value)}
-                        placeholder="Enter URL"
-                    />
-                </label>
-                <button type="submit" className="submit-btn">Submit</button>
-            </form>
+            <div className='form-continer'>
+                <form className="form" onSubmit={submit}>
+                    <label>
+                        <input
+                            type="text"
+                            value={url}
+                            onChange={(event) => setUrl(event.target.value)}
+                            placeholder="Enter URL"
+                        />
+                    </label>
+                    <button type="submit" className="submit-btn">Submit</button>
+                </form>
+            </div>
 
-            {response && !response.detail ? (
+            {!loading && response && !response.detail ? (
                 <div className="response-container">
                     <h2>Response</h2>
                     <ul className="response-list">
-                        {Object.entries(response).map(([key, value]) => (
-                            <li key={key} className="response-item">
-                                <strong>{key}:</strong> {JSON.stringify(value)}
+                        {Object.keys(response).map((drug, index) => (
+                            <li className="response-item" key={index}>
+                                <p><strong>{drug}:</strong></p>
+                                <div className="list-container">
+                                <ul>
+                                    {Object.entries(JSON.parse(response[drug])).map(([key, value]) => (
+                                        <li key={key}><strong>{key}: </strong> 
+                                            {Array.isArray(value) ? (
+                                                <ul>
+                                                    {value.map((item, idx) => (
+                                                        <li key={idx}>{item}</li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                value
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                                </div>
                             </li>
                         ))}
                     </ul>
                 </div>
-            ) : response && response.detail ? (
+            ) : !loading && response && response.detail ? (
                 <div>
                     <h2>404 Not Found</h2>
                 </div>
             ) : (
-                <Index />
+                <p>{loadingText}</p>
             )}
         </div>
     );

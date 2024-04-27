@@ -4,7 +4,7 @@ import uvicorn
 
 # import API routers
 from api.generate_hypothesis import router as generate_hypothesis_router
-from api.response import router as response_router
+from api.existing_response import router as response_router
 
 # create FastAPI instance
 app = FastAPI()
