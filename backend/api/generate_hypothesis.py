@@ -11,7 +11,7 @@ router = APIRouter()
 
 # get Supabase URL and key from environment variables and create client
 supabase_url = os.environ["SUPABASE_URL"]
-supabase_key = os.environ["SUPABASE_KEY"]
+supabase_key = os.environ["SUPABASE_API_KEY"]
 supabase_client = create_client(supabase_url, supabase_key)
 
 # define endpoint to generate therapeutic hypothesis
@@ -51,7 +51,7 @@ async def generate_hypothesis(front_data: dict):
             api_key=os.environ["TOGETHER_API_KEY"],
         )
         drug_client = instructor.from_openai(client, mode=instructor.Mode.TOOLS)
-        client = instructor.apatch(AsyncOpenAI(api_key=os.environ["OPENAI_KEY"]))
+        client = instructor.apatch(AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"]))
 
         # create chat completion using OpenAI client using Pydantic model for validation
         drug_response: DrugList = drug_client.chat.completions.create(

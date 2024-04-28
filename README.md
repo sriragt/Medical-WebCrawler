@@ -35,8 +35,9 @@ This project is a web application designed to generate therapeutic hypotheses gi
 4. Set up environment variables:
 
     - `SUPABASE_URL`: URL of Supabase database.
-    - `SUPABASE_KEY`: API key for Supabase database.
+    - `SUPABASE_API_KEY`: API key for Supabase database.
     - `TOGETHER_API_KEY`: API key for OpenAI's Together API.
+    - `OPENAI_API_KEY`: API key for OpenAI's API.
 
 5. Run the FastAPI server:
 
