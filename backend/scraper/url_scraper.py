@@ -10,7 +10,7 @@ async def scrape_url_with_selenium(url):
     browser.get(url)
 
     # allow time dynamic content to load
-    await asyncio.sleep(25)
+    await asyncio.sleep(30)
     html_content =  browser.page_source
     return html_content
 
@@ -28,7 +28,7 @@ async def scrape_url(url):
 
     # extract title and text
     title = soup.title.text.strip() if soup.title else None
-    text = soup.get_text(strip=True)[:30000] # only extract first 30000 characters stay under OpenAI token limit
+    text = soup.get_text(strip=True)[:35000] # only extract first 35000 characters stay under OpenAI token limit
 
     # scrape authors from Ash Publications
     authors = [author.text.strip() for author in soup.find_all("a", class_="linked-name js-linked-name stats-author-info-trigger")]

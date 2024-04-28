@@ -7,6 +7,7 @@ export default function Home() {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Loading');
+  const [error, setError] = useState(null);
 
   // handle form submission
   const submit = async (event) => {
@@ -14,6 +15,7 @@ export default function Home() {
     // prevent the default form submission behavior that causes webpage to reload
     event.preventDefault();
     setLoading(true);
+    setError(null);
 
     // send a POST request to the FastAPI server with the entered URL
     const response = await fetch('http://localhost:8000/api/generate_hypothesis/', {
@@ -23,6 +25,15 @@ export default function Home() {
       },
       body: JSON.stringify({ url }), // convert the URL to JSON to send it in the request body
     });
+
+    // check if response is successful
+    if (!response.ok) {
+      // if response is not ok, parse error response as JSON
+      const errorData = await response.json();
+      setError(errorData.detail);
+      setLoading(false);
+      return; // return early to stop further execution
+    }
 
     // parse response from the server as JSON
     const data = await response.json();
@@ -37,6 +48,7 @@ export default function Home() {
 
     // set loading state to false after response is received
     setLoading(false);
+    setError(null);
   };
 
   // create dynamic loading page
@@ -63,6 +75,7 @@ export default function Home() {
   return (
     <div className="container">
       <h2>Input Research Link</h2>
+      {error && <p>Error: {error}</p>}
       <div className='form-continer'>
           <form className="form" onSubmit={submit}>
               <label>
