@@ -1,6 +1,5 @@
 import { useRouter } from 'next/router.js';
 import { useState, useEffect } from 'react';
-import Index from './index.js';
 
 export default function Home() {
 

@@ -50,45 +50,46 @@ async def generate_hypothesis(front_data: dict):
         base_url="https://api.together.xyz/v1",
         api_key=os.environ["TOGETHER_API_KEY"],
     )
-    client = instructor.from_openai(client, mode=instructor.Mode.TOOLS)
-    # client = instructor.apatch(AsyncOpenAI())
+    drug_client = instructor.from_openai(client, mode=instructor.Mode.TOOLS)
+    client = instructor.apatch(AsyncOpenAI(api_key=os.environ["OPENAI_KEY"])) # NO OPENAI API KEY
 
     # create chat completion using OpenAI client using Pydantic model for validation
-    drug_response: DrugList = client.chat.completions.create(
+    drug_response: DrugList = drug_client.chat.completions.create(
         model="mistralai/Mixtral-8x7B-Instruct-v0.1",
         response_model=DrugList,
         messages=drug_messages,
     )
 
-    # tasks = []
-    llm_responses = {}
+    tasks = []
+    # llm_responses = {}
 
-    # throttle to first 20 drugs seen on page
+    # throttle to first 30 drugs seen on page
     for i in range(min(len(drug_response.drugs), 20)):
         drug = drug_response.drugs[i]
 
         llm_messages = [
-            {"role": "system", "content": f'The following is a research paper on a novel. Do not use any outside information other than this excerpt, and if a specific field is not mentioned say "not mentioned". Given the name of the drug, {drug}, find the protein target and disease addressed by {drug} if mentioned in the excerpt. Add the short section of verbatim text that supports these claims into the citation, the speakers who are making the extracted claims, and the name of any past or upcoming clinical trials that will feature {drug}, and say "not mentioned" if these fields are not mentioned. Do not make the citation too long. Finally, include the the results (e.g., overall survival, progression-free survival) of {drug}. Be concise.'},
+            {"role": "system", "content": f'The following is a research paper on a novel. Do not use any outside information other than this excerpt, and if a specific field is not mentioned say "not mentioned". Given the name of the drug, {drug}, find the protein target and disease addressed by {drug} if mentioned in the excerpt. Add the short section of verbatim text that supports these claims into the citation, the speakers who are making the extracted claims, and the name of any past or upcoming clinical trials that will feature {drug}, and return a list with just "not mentioned" if these fields are not mentioned. Do not make the citation too long. Finally, include the the results (e.g., overall survival, progression-free survival) of {drug}. Be concise.'},
             {"role": "user", "content": unstructured_text}
         ]
 
         # create chat completion using OpenAI client using Pydantic model for validation
-        # tasks.append(
-        #     client.chat.completions.create(
+        tasks.append(
+            client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                response_model=TherapeuticHypothesis,
+                messages=llm_messages,
+            )
+        )
+        # llm_response: TherapeuticHypothesis = client.chat.completions.create(
         #         model="mistralai/Mixtral-8x7B-Instruct-v0.1",
         #         response_model=TherapeuticHypothesis,
         #         messages=llm_messages,
         #     )
-        # )
-        llm_response: TherapeuticHypothesis = client.chat.completions.create(
-                model="mistralai/Mixtral-8x7B-Instruct-v0.1",
-                response_model=TherapeuticHypothesis,
-                messages=llm_messages,
-            )
         
-        llm_responses[drug] = llm_response.json()
+        # llm_responses[drug] = llm_response.json()
 
-    # llm_responses = await asyncio.gather(*tasks)
+    llm_responses = await asyncio.gather(*tasks)
+    llm_responses = {hypothesis.drug: json.dumps(hypothesis.dict()) for hypothesis in llm_responses}
 
     # generate UUID for database and URL sharing
     new_uuid = str(uuid.uuid4())
