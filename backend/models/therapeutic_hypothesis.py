@@ -11,7 +11,7 @@ class TherapeuticHypothesis(BaseModel):
     clinical_trial_names: List[str] = Field(..., description="The name of any past or upcoming clinical trials that will feature this drug. Write \"not mentioned\" if not found.")
     results: List[str] = Field(..., description="The results (e.g., overall survival, progression-free survival). Be concise. Write \"not mentioned\" if not found.")
 
-    # Convert TherapeuticHypothesis object to a dictionary.
+    # convert TherapeuticHypothesis object to a dictionary
     def to_dict(self) -> dict:
         return {
             "drug": self.drug,

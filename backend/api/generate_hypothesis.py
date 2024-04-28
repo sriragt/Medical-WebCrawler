@@ -51,7 +51,7 @@ async def generate_hypothesis(front_data: dict):
         api_key=os.environ["TOGETHER_API_KEY"],
     )
     drug_client = instructor.from_openai(client, mode=instructor.Mode.TOOLS)
-    client = instructor.apatch(AsyncOpenAI(api_key=os.environ["OPENAI_KEY"])) # NO OPENAI API KEY
+    client = instructor.apatch(AsyncOpenAI(api_key=os.environ["OPENAI_KEY"]))
 
     # create chat completion using OpenAI client using Pydantic model for validation
     drug_response: DrugList = drug_client.chat.completions.create(
@@ -63,7 +63,7 @@ async def generate_hypothesis(front_data: dict):
     tasks = []
     # llm_responses = {}
 
-    # throttle to first 30 drugs seen on page
+    # throttle to first 20 drugs seen on page to prevent overuse of OpenAI tokens
     for i in range(min(len(drug_response.drugs), 20)):
         drug = drug_response.drugs[i]
 
@@ -88,7 +88,10 @@ async def generate_hypothesis(front_data: dict):
         
         # llm_responses[drug] = llm_response.json()
 
+    # batch process LLM processing to generate hypotheses asynchronously
     llm_responses = await asyncio.gather(*tasks)
+
+    # convert Pydantic models into JSONs for frontend
     llm_responses = {hypothesis.drug: json.dumps(hypothesis.dict()) for hypothesis in llm_responses}
 
     # generate UUID for database and URL sharing
