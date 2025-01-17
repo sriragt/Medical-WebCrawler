@@ -7,7 +7,7 @@ router = APIRouter()
 
 # get Supabase URL and key from environment variables and create client
 supabase_url = os.environ["SUPABASE_URL"]
-supabase_key = os.environ["SUPABASE_KEY"]
+supabase_key = os.environ["SUPABASE_API_KEY"]
 supabase_client = create_client(supabase_url, supabase_key)
 
 # define endpoint to retrieve response by UUID
